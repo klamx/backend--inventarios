@@ -1,4 +1,5 @@
 const { response } = require('express')
+const bcrypt = require('bcryptjs')
 const { User } = require('../models/User')
 const { sequelize } = require('../database/config')
 
@@ -24,10 +25,14 @@ const createUser = async (req, res = response) => {
       })
     }
 
+    // encripta contraseñá
+    const salt = bcrypt.genSaltSync()
+    const pass = bcrypt.hashSync(password, salt)
+
     const createUser = await User.create({
       username,
       email,
-      password,
+      password: pass,
       is_admin,
     })
 
