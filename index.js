@@ -1,19 +1,21 @@
 const express = require('express')
 const { sequelize } = require('./database/config')
 require('dotenv').config()
+const cors = require('cors')
 
 const app = express()
 
 // db
 sequelize
-  // .authenticate()
-  // .then(() => {
-  //   console.log('Conexión exitosa a la base de datos.')
-  // })
-  // .catch((error) => {
-  //   console.error('Error al conectar a la base de datos:', error)
-  // })
+// .authenticate()
+// .then(() => {
+//   console.log('Conexión exitosa a la base de datos.')
+// })
+// .catch((error) => {
+//   console.error('Error al conectar a la base de datos:', error)
+// })
 
+app.use(cors())
 // directorio público
 app.use(express.static('public'))
 app.use(express.json())
