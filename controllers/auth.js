@@ -1,16 +1,49 @@
 const { response } = require('express')
-const { validationResult } = require('express-validator')
+const { User } = require('../models/User')
+const { sequelize } = require('../database/config')
 
-const createUser = (req, res = response) => {
-  const { name, email, password } = req.body
+const createUser = async (req, res = response) => {
+  const { username, email, password, is_admin } = req.body
+  try {
+    await User.sync()
 
-  return res.status(201).json({
-    ok: true,
-    msg: 'register',
-    name,
-    email,
-    password,
-  })
+    let user = await sequelize.query(
+      `select *
+    from "Users" as users
+    where users.email = '${email}' or users.username = '${username}'`,
+      {
+        model: User,
+        mapToModel: true,
+      }
+    )
+
+    if (user.length > 0) {
+      return res.status(400).json({
+        ok: false,
+        msg: 'Ya existe el correo o el nombre de usuario',
+      })
+    }
+
+    const createUser = await User.create({
+      username,
+      email,
+      password,
+      is_admin,
+    })
+
+    return res.status(201).json({
+      ok: true,
+      msg: 'registro',
+      username,
+      email,
+      id: createUser.user_id,
+    })
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      msg: 'Error al crear el usuario',
+    })
+  }
 }
 
 const loginUser = (req, res = response) => {
