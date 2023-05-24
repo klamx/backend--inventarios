@@ -51,15 +51,46 @@ const createUser = async (req, res = response) => {
   }
 }
 
-const loginUser = (req, res = response) => {
+const loginUser = async (req, res = response) => {
   const { email, password } = req.body
 
-  res.json({
-    ok: true,
-    msg: 'register',
-    email,
-    password,
-  })
+  try {
+    const user = await User.findOne({where: {
+      email
+    }})
+
+    if (!user) {
+      return res.status(400).json({
+        ok: false,
+        msg: "Usuario o contraseñá incorrectos"
+      })
+    }
+
+    // validar contraseñá
+    const validatePassword = bcrypt.compareSync(password, user.password)
+    
+    if (!validatePassword) {
+      return res.status(400).json({
+        ok: false,
+        msg: "Usuario o contraseñá incorrectos"
+      })
+    }
+
+    // Generar JWT
+
+    return res.json({
+      ok: true,
+      id: user.user_id,
+      username: user.username,
+    })
+
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      msg: 'Error al loguearse',
+    })
+  }
+  
 }
 
 const revalidateToken = (req, res = response) => {
